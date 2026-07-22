@@ -1,0 +1,49 @@
+# Require confirmation for commands that change external state or can destroy local work.
+
+prefix_rule(
+    pattern = ["git", "push"],
+    decision = "prompt",
+    justification = "Pushing changes affects a remote repository and must be explicitly confirmed.",
+    match = ["git push", "git push origin main"],
+    not_match = ["git status", "git diff"],
+)
+
+prefix_rule(
+    pattern = ["git", "reset", "--hard"],
+    decision = "prompt",
+    justification = "A hard reset can discard local work; inspect the target and obtain confirmation first.",
+    match = ["git reset --hard", "git reset --hard HEAD~1"],
+    not_match = ["git reset --soft HEAD~1", "git status"],
+)
+
+prefix_rule(
+    pattern = ["git", "clean"],
+    decision = "prompt",
+    justification = "Git clean can permanently remove untracked files; use a dry run and obtain confirmation first.",
+    match = ["git clean -fd", "git clean -fdx"],
+    not_match = ["git status"],
+)
+
+prefix_rule(
+    pattern = ["rm", ["-rf", "-fr"]],
+    decision = "prompt",
+    justification = "Recursive forced removal can destroy data; resolve the exact target and obtain confirmation first.",
+    match = ["rm -rf build", "rm -fr tmp"],
+    not_match = ["rm file.txt", "rmdir empty-dir"],
+)
+
+prefix_rule(
+    pattern = ["docker", "compose", "down"],
+    decision = "prompt",
+    justification = "Stopping Compose may remove development state, especially when volumes are requested.",
+    match = ["docker compose down", "docker compose down -v"],
+    not_match = ["docker compose ps", "docker compose up -d"],
+)
+
+prefix_rule(
+    pattern = ["pnpm", "exec", "prisma", "migrate", "reset"],
+    decision = "prompt",
+    justification = "Prisma migrate reset deletes database data; use migrations against the intended database instead.",
+    match = ["pnpm exec prisma migrate reset"],
+    not_match = ["pnpm db:migrate", "pnpm db:validate"],
+)

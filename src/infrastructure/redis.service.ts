@@ -1,0 +1,14 @@
+import { Injectable, OnModuleDestroy } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { Redis } from 'ioredis';
+import type { Env } from '../config/env.js';
+
+@Injectable()
+export class RedisService extends Redis implements OnModuleDestroy {
+  constructor(config: ConfigService<Env, true>) {
+    super(config.get('REDIS_URL', { infer: true }), { lazyConnect: true, maxRetriesPerRequest: 1 });
+  }
+  async onModuleDestroy(): Promise<void> {
+    if (this.status !== 'end') await this.quit();
+  }
+}

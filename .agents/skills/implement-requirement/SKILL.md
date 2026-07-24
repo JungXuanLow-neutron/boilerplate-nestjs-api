@@ -10,10 +10,11 @@ Carry a requirement from repository discovery to a verified, minimal implementat
 ## 1. Establish the contract
 
 1. Read `AGENTS.md`, the relevant feature module, nearby schemas, repositories, tests, Prisma models, and configuration before editing.
-2. Separate discoverable repository facts from product decisions. Inspect facts; ask only when an unresolved decision would materially change behavior.
-3. State observable acceptance criteria, including success, authorization, validation, error, and compatibility behavior.
-4. Classify impact across API contracts, persistence, security, configuration, external dependencies, documentation, and tests.
-5. Stop for direction before an unrequested breaking API change, destructive migration, ambiguous permission model, new external provider, or unrelated scope expansion.
+2. Re-check the current branch and worktree state before editing. If the user mentions branch changes, interruptions, or stale earlier work, inspect the live repo state again before proceeding.
+3. Separate discoverable repository facts from product decisions. Inspect facts; ask only when an unresolved decision would materially change behavior.
+4. State observable acceptance criteria, including success, authorization, validation, error, and compatibility behavior.
+5. Classify impact across API contracts, persistence, security, configuration, external dependencies, documentation, and tests.
+6. Stop for direction before an unrequested breaking API change, destructive migration, ambiguous permission model, new external provider, or unrelated scope expansion.
 
 ## 2. Load only relevant guidance
 
@@ -30,7 +31,7 @@ Read each selected reference completely. Do not load irrelevant references merel
 1. Assign ownership to an existing feature or create `src/<feature>/` when the capability is genuinely new.
 2. Trace the current request path and identify every contract that must change.
 3. Prefer a vertical slice over disconnected scaffolding: schema, persistence, business rule, transport, documentation, and tests should agree.
-4. Reuse established patterns before introducing an abstraction or production dependency.
+4. Reuse established patterns and official NestJS packages before introducing an abstraction, custom framework implementation, or new production dependency.
 5. Plan backward-compatible rollout for schema and public-contract changes whenever the requirement permits it.
 
 ## 4. Implement in dependency order
@@ -41,7 +42,7 @@ Read each selected reference completely. Do not load irrelevant references merel
 4. Implement service business rules and authorization invariants.
 5. Wire middleware, a thin controller, guards, module providers, and OpenAPI metadata only where each lifecycle concern belongs.
 6. Update environment validation, `.env.example`, health checks, or infrastructure only when the requirement needs them.
-7. Add focused unit tests and public-behavior e2e tests.
+7. Add regression coverage under `test/` by default. Do not create or modify `src/**/*.spec.ts` unless the user explicitly requests unit tests.
 8. Update human and agent documentation when commands, structure, or durable conventions change.
 
 Preserve existing user changes. Never edit generated Prisma files, reveal `.env`, or silently broaden the task.

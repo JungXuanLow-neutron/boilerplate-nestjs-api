@@ -47,3 +47,35 @@ prefix_rule(
     match = ["pnpm exec prisma migrate reset"],
     not_match = ["pnpm db:migrate", "pnpm db:validate"],
 )
+
+prefix_rule(
+    pattern = ["pnpm", "start"],
+    decision = "prompt",
+    justification = "Starting a long-lived app server changes the local environment and should only happen when the user explicitly asks.",
+    match = ["pnpm start", "pnpm start --watch"],
+    not_match = ["pnpm test", "pnpm build"],
+)
+
+prefix_rule(
+    pattern = ["pnpm", "start:dev"],
+    decision = "prompt",
+    justification = "Starting the development server is a long-lived action and should only happen when the user explicitly asks.",
+    match = ["pnpm start:dev"],
+    not_match = ["pnpm test:e2e", "pnpm lint"],
+)
+
+prefix_rule(
+    pattern = ["nest", "start"],
+    decision = "prompt",
+    justification = "Starting Nest directly launches a long-lived app process and should only happen when the user explicitly asks.",
+    match = ["nest start", "nest start --watch"],
+    not_match = ["nest build"],
+)
+
+prefix_rule(
+    pattern = ["node", "dist/src/main.js"],
+    decision = "prompt",
+    justification = "Launching the built application starts a long-lived app process and should only happen when the user explicitly asks.",
+    match = ["node dist/src/main.js"],
+    not_match = ["node -v", "node script.js"],
+)

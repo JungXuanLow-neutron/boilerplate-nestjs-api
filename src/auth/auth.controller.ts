@@ -1,5 +1,6 @@
 import { Body, Controller, HttpCode, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import { Throttle } from '@nestjs/throttler';
 import { CurrentUser, Public } from '../common/decorators.js';
 import type { Principal } from '../common/types.js';
 import { AuthService } from './auth.service.js';
@@ -9,10 +10,19 @@ import { LoginDto, RefreshDto, RegisterDto, TokenPairDto } from './auth.schemas.
 @Controller('auth')
 export class AuthController {
   constructor(private readonly auth: AuthService) {}
-  @Public() @Post('register') @ApiCreatedResponse({ type: TokenPairDto }) register(@Body() dto: RegisterDto) {
+  @Throttle({ default: { ttl: 60000, limit: 5 } })
+  @Public()
+  @Post('register')
+  @ApiCreatedResponse({ type: TokenPairDto })
+  register(@Body() dto: RegisterDto) {
     return this.auth.register(dto);
   }
-  @Public() @HttpCode(200) @Post('login') @ApiOkResponse({ type: TokenPairDto }) login(@Body() dto: LoginDto) {
+  @Throttle({ default: { ttl: 60000, limit: 5 } })
+  @Public()
+  @HttpCode(200)
+  @Post('login')
+  @ApiOkResponse({ type: TokenPairDto })
+  login(@Body() dto: LoginDto) {
     return this.auth.login(dto);
   }
   @Public() @HttpCode(200) @Post('refresh') @ApiOkResponse({ type: TokenPairDto }) refresh(@Body() dto: RefreshDto) {

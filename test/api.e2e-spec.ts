@@ -6,20 +6,25 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { AppModule } from '../src/app.module.js';
 import { configureApp } from '../src/app.setup.js';
 import { PrismaService } from '../src/infrastructure/prisma.service.js';
+import { RedisService } from '../src/infrastructure/redis.service.js';
 
 describe('API (real dependencies)', () => {
   let app: INestApplication;
   let db: PrismaService;
+  let redis: RedisService;
   let userId: string | undefined;
   let accessToken: string;
   let refreshToken: string;
 
   beforeAll(async () => {
+    process.env.TRUST_PROXY = 'true';
     const module = await Test.createTestingModule({ imports: [AppModule] }).compile();
     app = module.createNestApplication();
     configureApp(app);
     await app.init();
     db = app.get(PrismaService);
+    redis = app.get(RedisService);
+    await redis.flushdb();
   });
 
   afterAll(async () => {
@@ -106,5 +111,53 @@ describe('API (real dependencies)', () => {
       .delete(`/api/v1/users/${userId}/avatar`)
       .set('authorization', `Bearer ${accessToken}`)
       .expect(204);
+  });
+
+  it('rate limits repeated auth attempts with RFC problem details', async () => {
+    await redis.flushdb();
+    const forwardedIp = '198.51.100.24';
+
+    for (let index = 0; index < 5; index += 1) {
+      await request(app.getHttpServer())
+        .post('/api/v1/auth/register')
+        .set('x-forwarded-for', forwardedIp)
+        .send({})
+        .expect(400);
+    }
+
+    const rateLimited = await request(app.getHttpServer())
+      .post('/api/v1/auth/register')
+      .set('x-forwarded-for', forwardedIp)
+      .send({})
+      .expect(429);
+
+    expect(rateLimited.headers['content-type']).toContain('application/problem+json');
+    expect(rateLimited.body).toMatchObject({
+      status: 429,
+      code: 'RATE_LIMITED',
+      detail: 'Rate limit exceeded',
+    });
+    expect(rateLimited.body.requestId).toEqual(expect.any(String));
+  });
+
+  it('rate limits repeated non-auth requests with RFC problem details', async () => {
+    await redis.flushdb();
+    const forwardedIp = '198.51.100.25';
+
+    for (let index = 0; index < 100; index += 1) {
+      await request(app.getHttpServer()).get('/api/v1/health/live').set('x-forwarded-for', forwardedIp).expect(200);
+    }
+
+    const rateLimited = await request(app.getHttpServer())
+      .get('/api/v1/health/live')
+      .set('x-forwarded-for', forwardedIp)
+      .expect(429);
+
+    expect(rateLimited.headers['content-type']).toContain('application/problem+json');
+    expect(rateLimited.body).toMatchObject({
+      status: 429,
+      code: 'RATE_LIMITED',
+      detail: 'Rate limit exceeded',
+    });
   });
 });

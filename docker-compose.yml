@@ -2,13 +2,13 @@ services:
   postgres:
     image: postgres:18-alpine
     environment:
-      POSTGRES_USER: timesheet
+      POSTGRES_USER: boilerplate
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: timesheet
+      POSTGRES_DB: boilerplate
     ports: ['5432:5432']
     volumes: [postgres18_data:/var/lib/postgresql]
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U timesheet -d timesheet']
+      test: ['CMD-SHELL', 'pg_isready -U boilerplate -d boilerplate']
       interval: 5s
       timeout: 5s
       retries: 10

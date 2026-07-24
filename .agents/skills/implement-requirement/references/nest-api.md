@@ -13,6 +13,7 @@ paths:
 - Add shared utilities to `src/common/` only when multiple features use them and they contain no feature policy.
 - Keep relative ESM imports suffixed with `.js`.
 - Use the middleware, guard, pipe, interceptor, and filter lifecycle primitive that owns the concern; consult `middleware.md` for request-pipeline changes.
+- For framework-owned capabilities, prefer official NestJS packages and documented extension points first. Do not substitute a custom implementation when NestJS already provides an appropriate module, guard, or decorator unless the repo has a documented reason.
 
 ## Contracts and documentation
 
@@ -33,4 +34,4 @@ paths:
 
 - Register new controllers and providers in the owning module.
 - Update OpenAPI and Scalar through generated schemas rather than maintaining a separate specification.
-- Add unit coverage next to the implementation and e2e coverage under `test/` for externally observable behavior.
+- Add regression coverage under `test/` for externally observable behavior. Do not add `src/**/*.spec.ts` unless the user explicitly requests unit tests.

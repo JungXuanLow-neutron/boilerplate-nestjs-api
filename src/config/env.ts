@@ -22,6 +22,7 @@ export const envSchema = z.object({
   JWT_ACCESS_TTL: duration.default('15m'),
   JWT_REFRESH_TTL: duration.default('7d'),
   CORS_ORIGINS: z.string().default(''),
+  TRUST_PROXY: bool('false'),
   LOG_LEVEL: z.enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace']).default('info'),
   DOCS_ENABLED: bool('true'),
   SEED_ADMIN_EMAIL: z.string().email().optional(),

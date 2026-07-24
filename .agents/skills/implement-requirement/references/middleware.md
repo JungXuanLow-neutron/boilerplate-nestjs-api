@@ -14,6 +14,7 @@ paths:
 - Use pipes for request validation and transformation.
 - Use interceptors to wrap handler execution or transform successful responses.
 - Use exception filters to translate failures into the public error contract.
+- If NestJS already provides an official module or guard for the concern, use that official implementation instead of a custom middleware.
 - Do not create a Next.js-style `proxy.ts`; NestJS composes these lifecycle primitives explicitly.
 
 ## Select registration scope
@@ -30,4 +31,4 @@ paths:
 - Preserve `req.id`, the `x-request-id` response header, and Problem Details correlation.
 - Reuse the established Pino logger and extend its redaction list whenever new sensitive fields enter requests.
 - Never log authorization headers, cookies, passwords, refresh tokens, secrets, or private file contents.
-- Keep middleware behavior covered by focused unit tests and verify externally visible headers through e2e tests.
+- Verify externally visible middleware behavior through e2e tests. Do not add `src/**/*.spec.ts` unless the user explicitly requests unit tests.

@@ -4,12 +4,11 @@ import { AuthController } from './auth.controller.js';
 import { AuthGuard } from './auth.guard.js';
 import { AuthRepository } from './auth.repository.js';
 import { AuthService } from './auth.service.js';
-import { RateLimitGuard } from './rate-limit.guard.js';
 
 @Module({
   imports: [JwtModule.register({})],
   controllers: [AuthController],
-  providers: [AuthService, AuthRepository, AuthGuard, RateLimitGuard],
-  exports: [AuthService, AuthRepository, AuthGuard, RateLimitGuard],
+  providers: [AuthService, AuthRepository, AuthGuard],
+  exports: [AuthService, AuthRepository, AuthGuard],
 })
 export class AuthModule {}

@@ -4,7 +4,7 @@ import { Reflector } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { apiReference } from '@scalar/nestjs-api-reference';
 import type { INestApplication } from '@nestjs/common';
-import type { Request, Response } from 'express';
+import type { Express, Request, Response } from 'express';
 import helmet from 'helmet';
 import { cleanupOpenApiDoc, ZodSerializerInterceptor, ZodValidationPipe } from 'nestjs-zod';
 import { requestIdMiddleware } from './common/middleware/request-id.middleware.js';
@@ -14,6 +14,9 @@ import type { Env } from './config/env.js';
 export function configureApp(app: INestApplication): void {
   const config = app.get(ConfigService<Env, true>);
   const docsNonce = randomUUID().replaceAll('-', '');
+  if (config.get('TRUST_PROXY', { infer: true })) {
+    (app.getHttpAdapter().getInstance() as Express).set('trust proxy', true);
+  }
   app.use(
     helmet({
       contentSecurityPolicy: {
@@ -39,7 +42,7 @@ export function configureApp(app: INestApplication): void {
       SwaggerModule.createDocument(
         app,
         new DocumentBuilder()
-          .setTitle('Timesheet API')
+          .setTitle('boilerplate-nestjs')
           .setDescription('Authentication and user management API')
           .setVersion('1.0')
           .addBearerAuth()

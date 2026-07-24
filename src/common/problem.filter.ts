@@ -50,7 +50,7 @@ export class ProblemDetailsFilter implements ExceptionFilter {
       .status(status)
       .type('application/problem+json')
       .json({
-        type: `https://timesheet.local/problems/${code.toLowerCase().replaceAll('_', '-')}`,
+        type: `https://boilerplate-nestjs-api.local/problems/${code.toLowerCase().replaceAll('_', '-')}`,
         title,
         status,
         detail,

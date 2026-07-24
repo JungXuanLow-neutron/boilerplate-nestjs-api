@@ -1,16 +1,16 @@
-# Timesheet API Agent Guide
+# Boilerplate NestJS API Agent Guide
 
 ## Project boundary
 
 - Maintain a NestJS modular monolith for authentication, user administration, self-service profiles, health checks, and private MinIO-backed profile pictures.
-- Do not add timesheet features, email delivery, password reset, MFA, frontend code, or cloud deployment unless a requirement explicitly adds them.
+- Do not add domain-specific business features, email delivery, password reset, MFA, frontend code, or cloud deployment unless a requirement explicitly adds them.
 - Treat the user's current request and acceptance criteria as authoritative. Preserve existing behavior unless the requirement changes it.
 
 ## Runtime and commands
 
 - Use Node.js 24 LTS and pnpm 11. Do not use npm or yarn.
 - Keep the project ESM and include `.js` extensions in relative TypeScript imports.
-- Start infrastructure with `docker compose up -d` and run the API on the host with `pnpm start:dev`.
+- Start infrastructure with `docker compose up -d` only when needed for verification. Do not start long-lived app processes such as `pnpm start`, `pnpm start:dev`, `nest start`, or `node dist/src/main.js` unless the user explicitly asks.
 - Use `pnpm db:migrate` for committed migrations and deployments. Use `pnpm db:migrate:dev` only while authoring a new migration.
 - Verify changes with the smallest useful focused checks, then run the relevant commands from: `pnpm lint`, `pnpm format:check`, `pnpm typecheck`, `pnpm test`, `pnpm test:e2e`, and `pnpm build`.
 
@@ -34,7 +34,7 @@
 | `test/`                               | Cross-module integration and end-to-end tests.                                    |
 | `dist/`, `coverage/`, `node_modules/` | Generated local artifacts; never treat them as source.                            |
 
-- Put each new business capability in `src/<feature>/` with its module, controller, service, repository, schemas, and colocated unit tests as needed.
+- Put each new business capability in `src/<feature>/` with its module, controller, service, repository, and schemas. Prefer regression coverage under `test/`; do not create or modify `src/**/*.spec.ts` unless the user explicitly requests unit tests.
 - Add code to `src/common/` only after at least two features need the abstraction and it contains no feature business rules.
 - Update this map in the same change whenever a meaningful source or agent-configuration directory is introduced.
 
@@ -50,6 +50,7 @@
 - Put project-owned global middleware in `src/common/middleware/` and register it in `configureApp()` in explicit execution order.
 - Prefer functional middleware when it has no dependencies. Use class middleware with `MiddlewareConsumer` for dependency injection or route-specific application.
 - Always call `next()` unless middleware intentionally completes the response.
+- For framework-owned capabilities such as rate limiting, OpenAPI security, guards, or validation plumbing, use the official NestJS package and documented lifecycle primitive first. Do not build a custom replacement unless the requirement or repo constraints provide a specific reason.
 
 ## Contracts, errors, and security
 
@@ -71,10 +72,11 @@
 ## Change workflow
 
 - Use the `implement-requirement` skill for new features, endpoints, fields, integrations, migrations, permissions, or changed behavior.
+- Re-ground on the current branch, worktree, and nearby implementation before editing. If the user switches branches, mentions an interruption, or indicates earlier context was stale, inspect the current state again before continuing.
 - Inspect nearby implementation and tests before editing. Resolve repository facts through inspection and ask only about material product choices.
 - Define observable acceptance criteria and affected contracts before implementation.
 - Keep changes scoped and preserve unrelated user work. Do not commit, push, or perform destructive cleanup unless explicitly requested.
-- Add regression coverage at the lowest useful level and e2e coverage for public behavior, authorization, persistence, or dependency integration.
+- Add regression coverage under `test/` for public behavior, authorization, persistence, dependency integration, and framework configuration changes. Do not add `src/**/*.spec.ts` unless the user explicitly asks for unit tests.
 - Update OpenAPI, `.env.example`, README, migrations, and this guide when the corresponding contract or structure changes.
 
 ## Definition of done
